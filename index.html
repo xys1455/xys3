@@ -11,17 +11,21 @@
       content="inspare oneself"
     />
     <style>
-        body {
+        *{
             margin: 0;
-            display: flex;
-            align-items: center;
-            height: 100vh;
-            background-image: url("shenshu.png");
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background-image: url(shenshu.png);
             background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
             justify-content: center;
             align-items: center;
+            background-position: center center;
+            background-repeat: no-repeat;
         }
         .box {
             display: flex;
@@ -62,8 +66,10 @@
     </style>
 </head>
 <body>
-    <div>
-        <div class="box">
+    <canvas></canvas>
+    <div style="position: absolute;">
+        <div class="box" style="flex-direction: column;">
+            <div class="box">
             <input style="color: yellow;" placeholder="最重要的事" id="shuRuKuang"/>
             <span style="color: white;" id="anNiu" onclick="change()">√</span>
         </div>
@@ -72,11 +78,12 @@
             <li>失败乃成功之母</li>
             <li>长风破浪会有时，直挂云帆济沧海</li>
         </ul>
+        </div>
     </div>
     <script>
-      let youShi = false;
+        let youShi = false;
 
-      function change() {
+        function change() {
         let anNiu = document.getElementById("anNiu");
         let shuRuKuang = document.getElementById("shuRuKuang");
 
@@ -95,11 +102,56 @@
         } 
       }
 
-      let date = window.localStorage.getItem("shi");
-      if (date) {
+         
+        let date = window.localStorage.getItem("shi");
+        if (date) {
         document.getElementById("shuRuKuang").value = date;
         change();
       }
+
+        let canvas = document.querySelector("canvas");
+        let conttext = canvas.getContext('2d');
+        let w = window.innerWidth;
+        let h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        let num = 200;
+        let snows = [];
+        for(let i = 0;i < num; i++){
+            snows.push({
+                x:Math.random()*w,
+                y:Math.random()*h,
+                r:Math.random()*10+1
+            });
+        }
+        let move = () => {
+            for(let i = 0; i < num; i++){
+                let snow = snows[i];
+                snow.x += Math.random()*2+1;
+                snow.y += Math.random()*2+1;
+                snow.x = snow.x > w ? 0 : snow.x;
+                snow.y = snow.y > h ? 0 : snow.y;
+            }
+        }
+        let draw = () => {
+            conttext.clearRect(0,0,w,h);
+            conttext.beginPath();
+            conttext.fillStyle = 'rgb(255,255,255)';
+            conttext.shadowColor = 'rgb(255,255,255)';
+            conttext.shadowBlur = 10;
+
+            for(let i = 0; i < num; i++){
+                let snow = snows[i];
+                conttext.moveTo(snow.x,snow.y);
+                conttext.arc(snow.x,snow.y,snow.r,0,Math.PI*2);
+            }
+            conttext.fill();
+            conttext.closePath();
+            move();
+        }
+        draw();
+        setInterval(draw,30);
     </script>
 </body>
 </html>
