@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./img/hanwudi.gif" type="image/x-icon" />
+    <title>inspire起始页</title>
+    <link
+      rel="stylesheet"
+      href="https://at.alicdn.com/t/c/font_3865589_713jmlj249e.css?spm=a313x.7781069.1998910419.53&file=font_3865589_713jmlj249e.css"
+    />
+    <!-- 阿里图标库 -->
+    <link rel="stylesheet" href="./css/style.css" />
+    <!-- 引入css文件 -->
+    <script src="./js/time.js"></script>
+    <!-- 引入别人写好的时间模块 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- 引入vue包 -->
+    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+    <!-- 这个暂时用不到因为我们本期用的是jsonp请求 -->
+    <meta
+      name="description"
+      content="inspare oneself"
+    />
+    <style>
+        body{
+            background-image: url(./img/shenshua.png);
+            background-size: cover;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+        .box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #shuRuKuang {
+            border: 0;
+            border-bottom: 2px solid #fff;
+            padding: 4px 2px;
+            display: block;
+            background: 0;
+            line-height: 1.5;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s ease-in-out;
+            border-radius: 0;
+            color: #fff;
+            font-size: 2rem;
+            max-width: 90%;
+        }
+        #anNiu {
+            margin-left: -50px;
+            margin-right: 10px;
+            color: #ccc;
+            border-radius: 50%;
+            height: 40px;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+        input::placeholder {
+            color: #ccc;
+        }
+        input::-webkit-input-placeholder {
+            color: #ccc;
+        }
+    </style>
+  </head>
+  <body>
+    <!-- 首先建立一个用于挂载vue的盒子 -->
+    <div id="app" :class="{'focus':isFocus,'hover':isHover&&!isFocus}">
+      <div id="body">
+        <div class="bhead">
+          <div
+            class="timer"
+            :style="(timer!='00:00') ? 'opacity: 1;display:block' : '' "
+          >
+            {{timer[0]}}<span>:</span>{{timer[1]}}
+          </div>
+          <div id="unFocusCover" @click.stop="searchBlur"></div>
+          <!-- 用于取消聚焦事件 -->
+          <div class="searchBox">
+            <div class="search">
+              <input
+                type="text"
+                placeholder="搜索"
+                size="30"
+                @focus="searchFocus"
+                v-model="searchValue"
+                @keyup.enter="search"
+                @input="searchinput"
+                autocomplete="off"
+                ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
+                ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
+              /><!-- 禁止拖动文本进搜索框内和禁止使用历史填写记入直接显示针对部分浏览器 -->
+            </div>
+            <div
+              id="SearchEngBtn"
+              class="searchInputBtn"
+              @mouseover="isHover=true"
+              @mouseleave="isHover=false"
+              :style="isFocus?'opacity: 1':''"
+            >
+              <span class="iconfont icon-Bing searchInputBtn"></span>
+            </div>
+            <div
+              id="SearchBtn"
+              class="searchInputBtn"
+              @mouseover="isHover=true"
+              @mouseleave="isHover=false"
+              :style="isFocus?'opacity: 1':''"
+              @click="isFocus?search():''"
+            >
+              <span class="iconfont icon-sousuo"></span>
+            </div>
+          </div>
+          <div class="searchSuggestionContainer" :style="advSearchBoxStyle">
+            <ul>
+              <li class="DefaultSuggest" @click="search(searchValue,true,true)">
+                <span class="iconfont icon-shuyi_fanyi-36"></span>翻译:
+                {{searchValue}}
+              </li>
+              <li
+                class="add"
+                v-for="list in advSuggest"
+                @click="search(list,true)"
+              >
+                {{list}}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas></canvas>
+    <div style="position: absolute;">
+        <div class="box" style="flex-direction: column;">
+            <div class="box">
+            <input style="color: yellow;" placeholder="最重要的事" id="shuRuKuang"/>
+            <span style="color: white;" id="anNiu" onclick="change()">√</span>
+        </div>
+        <ul style="color: red;">
+            <li>书山有路勤为径，学海无涯苦作舟</li>
+            <li>失败乃成功之母</li>
+            <li>长风破浪会有时，直挂云帆济沧海</li>
+        </ul>
+        </div>
+    </div>
+    <script>
+        let youShi = false;
+
+        function change() {
+        let anNiu = document.getElementById("anNiu");
+        let shuRuKuang = document.getElementById("shuRuKuang");
+
+        if (youShi) {
+            youShi = false;
+            anNiu.innerText = "√";
+            shuRuKuang.style.borderBottomColor = "yellow";
+            shuRuKuang.readOnly = false;
+            window.localStorage.removeItem("shi")
+        } else {
+            youShi = true;
+            anNiu.innerText = "×";
+            shuRuKuang.style.borderBottomColor = "transparent";
+            shuRuKuang.readOnly = true;
+            window.localStorage.setItem("shi", shuRuKuang.value);
+        } 
+      }
+
+         
+        let date = window.localStorage.getItem("shi");
+        if (date) {
+        document.getElementById("shuRuKuang").value = date;
+        change();
+      }
+
+        let canvas = document.querySelector("canvas");
+        let conttext = canvas.getContext('2d');
+        let w = window.innerWidth;
+        let h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        let num = 200;
+        let snows = [];
+        for(let i = 0;i < num; i++){
+            snows.push({
+                x:Math.random()*w,
+                y:Math.random()*h,
+                r:Math.random()*10+1
+            });
+        }
+        let move = () => {
+            for(let i = 0; i < num; i++){
+                let snow = snows[i];
+                snow.x += Math.random()*2+1;
+                snow.y += Math.random()*2+1;
+                snow.x = snow.x > w ? 0 : snow.x;
+                snow.y = snow.y > h ? 0 : snow.y;
+            }
+        }
+        let draw = () => {
+            conttext.clearRect(0,0,w,h);
+            conttext.beginPath();
+            conttext.fillStyle = 'rgb(255,255,255)';
+            conttext.shadowColor = 'rgb(255,255,255)';
+            conttext.shadowBlur = 10;
+
+            for(let i = 0; i < num; i++){
+                let snow = snows[i];
+                conttext.moveTo(snow.x,snow.y);
+                conttext.arc(snow.x,snow.y,snow.r,0,Math.PI*2);
+            }
+            conttext.fill();
+            conttext.closePath();
+            move();
+        }
+        draw();
+        setInterval(draw,30);
+    </script>
+  </body>
+</html>
+<script src="./js/index.js"></script>
